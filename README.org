@@ -26,7 +26,9 @@ Adapted from [[http://ergoemacs.org/emacs/elisp_read_file_content.html][Xah Lee]
 
 [[https://adventofcode.com/2020/day/1][Instructions]]
 
-*** Requirements
+*** Part 1
+
+**** Requirements
 
 1. Load puzzle input
 2. Find which 2 values in puzzle input sum to 2020
@@ -58,12 +60,65 @@ a pass through the full list).
 And the final result is the product of those two values:
 
 #+begin_src emacs-lisp
-
-(* (car result)  (car (last result)))
+  (setq result_part1 (eval (cons '* result)))
 #+end_src
 
 #+RESULTS:
 : 910539
 
-(There must be a better way to multiply the list elements - especially for a
-two element list - but my immediate assumption of ~(* result)~ does not work.
+I think this approach of inserting the operator into the start of the list,
+and then evaluating the list, is the "lisp-ish" way to multiply the list
+together.  But I'm not certain there isn't a better method.
+
+*** Part 2
+
+**** Requirements
+
+1. Find product of the three numbers that sum to 2020
+
+**** Processing
+
+Already have processing for 2 numbers that sum to 2020.  Can we loop over each
+value in the input data and calculate if two numbers in the input sum to
+~(2020 - current loop value)~?
+
+First, can we change ~inverse-in-list~ to use an arbitrary value rather than
+2020?
+#+begin_src emacs-lisp
+  (defun inverse-in-list (sequence item reference) (if (member (- item reference) sequence) t nil))
+  (setq result (seq-filter
+		(apply-partially 'inverse-in-list data 2020) data))
+#+end_src
+
+#+RESULTS:
+| 679 | 1341 |
+
+And now loop over each value in the input, and call the new ~inverse-in-list~
+with a reference of ~2020 - value~:
+
+#+begin_src emacs-lisp
+  (setq result '())
+  (dolist (current-data data result)
+    (setq interim_result (seq-filter
+		  (apply-partially 'inverse-in-list data (- 2020 current-data)) data))
+    (if interim_result (push current-data result))
+  )
+#+end_src
+
+#+RESULTS:
+| 131 | 977 | 912 |
+
+In English, the above creates a ~result~ list to accumulate the values we want
+to multiply.  Then, for each ~current-data~ in the ~data~ list, we check if
+any two values in the list add up to ~(2020 - current-data)~.  If they do, we
+accumulate the ~current-data~.  Notice that the third argument of ~do-list~ is
+the returned value, in this case the accumulated ~result~.
+
+Finally, a similar multiplication as for part 1:
+
+#+begin_src emacs-lisp
+  (setq result_part2 (eval (cons '* result)))
+#+end_src
+
+#+RESULTS:
+: 116724144
