@@ -1,5 +1,7 @@
 * Tackling Advent of Code 2020 in emacs lisp
 
+[TABLE-OF-CONTENTS]
+
 ** Resources
 
 [[https://adventofcode.com][Advent of code]]
@@ -8,19 +10,33 @@
 
 **** Read data
 
-Adapted from [[http://ergoemacs.org/emacs/elisp_read_file_content.html][Xah Lee]]
+Utility functions for loading the input data.  ~read-lines~ adapted from an
+example by [[http://ergoemacs.org/emacs/elisp_read_file_content.html][Xah Lee]].
 
     #+begin_src emacs-lisp
-      (defun read-lines (filePath)
-	"Return a list of lines of a file at filePath."
-	(with-temp-buffer
-	  (insert-file-contents filePath)
-	  (mapcar 'string-to-number
-		  (split-string (buffer-string) "\n" t))))
+	  (defun read-lines (filePath)
+	    "Return a list of lines of a file at filePath."
+	    (with-temp-buffer
+	      (insert-file-contents filePath)
+	      (split-string (buffer-string) "\n" t)))
+
+	  (defun line-to-numbers (line)
+	    "Convert a whitespace separated list of strings into numbers"
+	    (apply 'string-to-number
+		    (split-string line))
+	    )
+
+	  (defun read-numbers (filePath)
+	    "Return a list of all the numbers in a file at filePath."
+	    (let (
+		  (lines (read-lines filePath))
+		  )
+		 (mapcar 'line-to-numbers lines))
+	    )
     #+end_src
 
     #+RESULTS:
-    : read-lines
+    : read-numbers
 
 ** Day 01
 
@@ -37,7 +53,7 @@ Adapted from [[http://ergoemacs.org/emacs/elisp_read_file_content.html][Xah Lee]
 **** Load data
 
      #+begin_src emacs-lisp
-       (setq data (read-lines '"inputs/day1.txt"))
+       (setq data (read-numbers '"inputs/day1.txt"))
      #+end_src
 
      #+RESULTS:
@@ -122,3 +138,78 @@ Finally, a similar multiplication as for part 1:
 
 #+RESULTS:
 : 116724144
+
+** Day 02
+
+[[https://adventofcode.com/2020/day/2][Instructions]]
+
+*** Part 1
+
+**** Requirements
+
+1. Load puzzle input
+2. Count valid passwords in input, where valid password defined as:
+   #+begin_quote
+suppose you have the following list:
+
+1-3 a: abcde
+1-3 b: cdefg
+2-9 c: ccccccccc
+Each line gives the password policy and then the password. The password policy indicates the lowest and highest number of times a given letter must appear for the password to be valid. For example, 1-3 a means that the password must contain a at least 1 time and at most 3 times.
+   #+end_quote
+
+**** Processing
+
+So let's start with a function to validate a single line:
+
+#+begin_src emacs-lisp
+  (defun password-break-line (line)
+    "Breaks a line from the day 2 input in to the parts needed for validation"
+    (let* (
+	   (parts (split-string line))
+	   (counts (split-string (elt parts 0) "-")))
+    (setq
+	   min-count (string-to-number (elt counts 0))
+	   max-count (string-to-number (elt counts 1))
+	   letter (substring (elt parts 1) 0 1)
+	   password (elt parts 2)
+	   )
+      )
+  )
+
+  (defun validate-password (line)
+    "Checks if a password is valid according to the day 2 instructions."
+    (message line)
+    (password-break-line line)
+    (let (
+	  (letter-count
+	   (- (length
+	       (split-string password
+			     letter
+			     )
+	       )
+	      1)
+	   )
+	  )
+      (setq result (<= min-count letter-count max-count))
+    )
+    result
+    )
+  (validate-password "2-9 c: ccccccccc")
+#+end_src
+
+#+RESULTS:
+: t
+
+And now apply across all lines:
+
+#+begin_src emacs-lisp
+    (setq data (read-lines '"inputs/day2.txt"))
+    (setq result (seq-filter 'validate-password data))
+    (length result)
+#+end_src
+
+#+RESULTS:
+: 434
+
+Which is the right result for part 1 of day 2 ⌣
