@@ -274,9 +274,13 @@ and test cases:
 
 ** Day 04
 
-Skipping to day 4 for a python experiment.  First, load the day 4 data with
-lisp.  Loading the data isn't an interesting python problem, but combining
-lisp and python is an interesting problem:
+Note that if you're using the github viewer for this file, the results are all
+hidden.  Use the 'raw' button to see results (or download and view in the one
+true editor).
+
+Skipping to day 4 for a python experiment.  First, load the day
+4 data with lisp.  Loading the data isn't an interesting python problem, but
+combining lisp and python is an interesting problem:
 
 #+name: load-day4
 #+begin_src emacs-lisp
